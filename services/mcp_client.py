@@ -165,7 +165,18 @@ def load_mcp_tools() -> list:
         if not command:
             continue
 
-        client = MCPClient(name, command, args)
+        # Resolve relative filesystem paths dynamically based on local workspace
+        resolved_args = [
+            (
+                os.path.abspath(arg)
+                if isinstance(arg, str)
+                and (arg.startswith(("./", "../")) or os.path.exists(arg))
+                else arg
+            )
+            for arg in args
+        ]
+
+        client = MCPClient(name, command, resolved_args)
         if client.connect():
             tools = client.list_tools()
             for t_cfg in tools:

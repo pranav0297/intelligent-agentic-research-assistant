@@ -218,7 +218,7 @@ docker run -d \
 Run the included verification script to ensure your local Python application can communicate with OmniRoute on port `20128`:
 
 ```bash
-PYTHONUNBUFFERED=1 PYTHONPATH=. ./venv/bin/python scratch/test_omniroute.py
+python demo/demo_rag.py
 ```
 
 If configured properly, it will print a successful model generation response!

@@ -575,13 +575,13 @@ To bypass rate limits during testing and enable auto-fallback across multiple AP
    docker run -d -p 20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
    ```
 2. Navigate to the dashboard at `http://localhost:20128` (default login is `admin` / `CHANGEME`) and register your credentials under "Providers".
-3. Open [`config/settings.py`](file:///Users/himanshubhandari/Downloads/RTB/RTB_Project_Impetus/intelligent-agentic-research-assistant/config/settings.py) and change the toggle setting:
+3. Open `config/settings.py` and change the toggle setting:
    ```python
    USE_OMNIROUTE: bool = True
    ```
-4. Test the proxy connectivity:
+4. Test the pipeline connectivity:
    ```bash
-   PYTHONUNBUFFERED=1 PYTHONPATH=. ./venv/bin/python scratch/test_omniroute.py
+   python demo/demo_rag.py
    ```
 
 ------------------------------------------------------------------------
@@ -642,14 +642,17 @@ the missing reference is detected before retrieval.
 # 🔌 Model Context Protocol (MCP) Setup
 
 To connect filesystem tools or custom APIs:
-1. Open [`config/mcp_servers.json`](file:///Users/himanshubhandari/Downloads/RTB/RTB_Project_Impetus/intelligent-agentic-research-assistant/config/mcp_servers.json).
+1. Open `config/mcp_servers.json`.
 2. Configure your server command and arguments:
    ```json
    {
      "mcpServers": {
        "filesystem": {
          "command": "node",
-         "args": ["/path/to/server/index.js", "/path/to/data"]
+         "args": [
+           "node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+           "./data"
+         ]
        }
      }
    }
