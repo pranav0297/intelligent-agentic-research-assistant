@@ -2,6 +2,11 @@ import datetime
 import os
 import shutil
 
+# Disable CrewAI telemetry and tracing banners
+os.environ["CREWAI_TRACING_ENABLED"] = "false"
+os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+os.environ["OTEL_SDK_DISABLED"] = "true"
+
 from dotenv import load_dotenv
 
 # Load environment variables BEFORE importing services.

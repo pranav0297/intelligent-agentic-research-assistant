@@ -1,9 +1,9 @@
-"""
-CrewAI Multi-Agent Service.
+import os
 
-Orchestrates specialized agents (Planner, Researcher, Synthesizer)
-to conduct autonomous research and compile structured reports.
-"""
+# Disable CrewAI telemetry and tracing banners
+os.environ["CREWAI_TRACING_ENABLED"] = "false"
+os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+os.environ["OTEL_SDK_DISABLED"] = "true"
 
 from crewai import LLM, Agent, Crew, Task
 from crewai.tools import tool
@@ -81,15 +81,15 @@ def run_autonomous_research(topic: str, vector_store) -> str:
 
     # Initialize model target based on configuration
     if USE_OMNIROUTE:
-        # Prepend provider prefix so LiteLLM parses it as OpenAI provider
-        # but preserves the original provider name in the request payload
-        model = MODEL_NAME
-        if not model.startswith("openai/"):
-            model = f"openai/{model}"
-        model = f"openai/{model}"
+        # CrewAI LLM strips the initial provider prefix ('openai/').
+        # Prepend 'openai/' so the model parameter sent in the HTTP payload to OmniRoute
+        # retains the necessary provider routing prefix (e.g. 'openai/gpt-oss-120b').
+        model_payload = MODEL_NAME
+        if not model_payload.startswith("openai/"):
+            model_payload = f"openai/{model_payload}"
 
         crew_llm = LLM(
-            model=model,
+            model=f"openai/{model_payload}",
             base_url=OMNIROUTE_API_BASE,
             api_key=_get_groq_api_key(),
             temperature=TEMPERATURE,
@@ -104,6 +104,10 @@ def run_autonomous_research(topic: str, vector_store) -> str:
             api_key=_get_groq_api_key(),
             temperature=TEMPERATURE,
         )
+
+    # Ensure native function calling is enabled so CrewAI uses OpenAI-compatible
+    # tool calling rather than falling back to text-based ReAct with tool_choice="none"
+    crew_llm.supports_function_calling = lambda: True
 
     # Load SQLite Long-Term Memory (LTM) context
     from services.mcp_client import load_mcp_tools
@@ -146,11 +150,12 @@ def run_autonomous_research(topic: str, vector_store) -> str:
         role="Evidence Retrieval Specialist",
         goal=(
             "Execute searches using the search_pdf and search_web tools to "
-            "retrieve concrete evidence for each query in the research plan."
+            "retrieve concrete evidence for each query in the research plan. "
+            "Collect findings concisely and deliver the evidence."
         ),
         backstory=(
             "A meticulous search specialist who knows exactly how to query "
-            "databases and the web to find precise, raw, factual data."
+            "databases and the web to find precise, raw, factual data quickly."
         ),
         tools=tools,
         verbose=True,
@@ -201,13 +206,14 @@ def run_autonomous_research(topic: str, vector_store) -> str:
     gathering_task = Task(
         description=(
             "Execute the queries drafted in the research plan. Use search_pdf for "
-            "technical details and papers, and search_web for current/external info. "
-            "Gather raw, concrete facts, findings, and citations. Keep the raw source "
-            "details intact."
+            "technical details and local papers, and search_web for external or current info. "
+            "Perform at most 2 to 3 targeted searches. Once key evidence is retrieved, "
+            "DO NOT make further tool calls—immediately return all raw findings, excerpts, and "
+            "source citations as your final answer."
         ),
         expected_output=(
-            "Raw retrieved paragraphs, search findings, and their respective source "
-            "titles/filenames."
+            "A structured compilation of raw retrieved paragraphs, search findings, "
+            "and their respective source titles/filenames."
         ),
         agent=researcher,
     )

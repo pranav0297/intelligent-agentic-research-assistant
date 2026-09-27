@@ -131,7 +131,7 @@ INDEX_MANIFEST_FILENAME = "manifest.json"
 # Agent Max Iterations / Executions
 # -----------------------------
 
-MAX_AGENT_ITERATIONS = 3
+MAX_AGENT_ITERATIONS = 15
 
 MAX_TOOL_EXECUTIONS_PER_RUN = 2
 
