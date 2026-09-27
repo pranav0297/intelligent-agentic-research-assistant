@@ -53,9 +53,15 @@ The current implementation provides:
 -   📄 Retrieval-Augmented Generation (RAG) over PDF documents
 -   🌐 AI-powered web search using Tavily
 -   🔀 Adaptive PDF-only, Hybrid, and Web-only retrieval strategies
--   🤖 **Autonomous Multi-Agent Crew (v3.0.0):** Specialized Lead Research Planner, Evidence Specialist, and Synthesis Agent cooperating for deep research.
--   💾 **Long-Term Memory (LTM) database (v3.0.0):** SQLite engine mapping past contexts and custom style preferences.
--   🔌 **Model Context Protocol (v3.0.0):** stdio client dynamically mapping server tools into the researcher agent's loop.
+-   🤖 **Autonomous Multi-Agent Crew (v3.0.0+):** Specialized Lead Research Planner, Evidence Retrieval Specialist, and Synthesis & Verification Agent cooperating for in-depth research.
+-   💾 **Long-Term Memory (LTM) database (v3.0.0+):** SQLite engine (`db/memory.db`) caching past research reports and user style/depth preferences.
+-   🔌 **Model Context Protocol (v3.0.0+):** stdio-based MCP client dynamically discovering and exposing tools to the research crew.
+-   🚀 **Live Demonstration Suite (v3.2.2+):** Standalone interactive scripts in `demo/` (`demo_rag.py`, `demo_crew_mcp_memory.py`) demonstrating interactive RAG, multi-agent Crew execution, MCP tool invocation, and SQLite LTM logging.
+-   🏷️ **Automated Release Tagging CI/CD (v3.1.3+):** GitHub Actions workflow (`.github/workflows/tag_release.yml`) for automated semantic git release tagging on PR merge to `main`.
+-   🧠 **High-Precision Embeddings (v3.1.0+):** Switched default embedding model to `BAAI/bge-small-en-v1.5` for top-tier MTEB retrieval accuracy.
+-   🛡️ **Multi-Agent Stability & Native Function Calling (v3.2.3):** Enabled native tool calling on CrewAI LLMs, tuned agent iteration headroom (`MAX_AGENT_ITERATIONS = 15`), resolved LiteLLM fallback errors, and suppressed telemetry/tracing banners.
+-   📂 **Portable Workspace Configuration:** Clean repository-root relative paths and dynamic local filesystem resolution across macOS, Linux, and Windows.
+-   📖 **Production Zero-Setup Guide:** Comprehensive onboarding documentation in `Setup.md` and `.env.example` template with Docker OmniRoute setup.
 -   🔗 True hybrid retrieval across PDF and Web evidence
 -   🧩 Normalized cross-source retrieval candidates
 -   🎯 Embedding-based cross-source reranking
@@ -86,12 +92,51 @@ The current implementation provides:
 -   🔗 Pronoun and conversational reference resolution
 -   🛡️ Unresolved-context detection before retrieval
 -   🧹 Conversation memory reset with the `clear` command
--   🧪 Extensive unit test coverage (52% code coverage) under mocked environments
+-   🧪 Extensive unit test coverage (25 unit tests) under mocked environments
 -   🔄 Extensible architecture for future AI capabilities
 
 ------------------------------------------------------------------------
 
 # 🎯 Current Release
+
+## **v3.2.3 -- Autonomous Multi-Agent Stability, Live Demonstration Harness, and Portable Zero-Setup Experience**
+
+### ✨ Highlights
+
+-   🛡️ **Multi-Agent Crew Stability & Native Tool Calling:** Enabled native function calling on the CrewAI LLM (`crew_llm.supports_function_calling = lambda: True`), preventing LiteLLM from falling back to ReAct mode with `tool_choice="none"`. Configured agent iteration headroom (`MAX_AGENT_ITERATIONS = 15`) and refined prompt completion directives so the Evidence Retrieval Specialist terminates naturally after 2–3 targeted searches.
+-   📂 **Portable Workspace Paths:** Eliminated all machine-specific hardcoded paths from documentation and configs. Dynamically resolve relative filesystem arguments in `services/mcp_client.py` and configured `./data` in `config/mcp_servers.json` for plug-and-play execution on any machine.
+-   🚀 **Live Demonstration Suite (`demo/`):** Added standalone, reproducible demo scripts:
+    *   `demo/demo_rag.py`: Evaluates interactive PDF, Web, and Hybrid RAG retrieval with source attribution and citations.
+    *   `demo/demo_crew_mcp_memory.py`: Demonstrates multi-agent Crew execution, Model Context Protocol (MCP) tool binding, and SQLite Long-Term Memory (LTM) logging.
+-   🧠 **High-Precision Embeddings:** Default embedding model updated to `BAAI/bge-small-en-v1.5` (384-dimensional) for superior semantic retrieval and ranking on MTEB benchmarks.
+-   🏷️ **Automated CI/CD Release Tagging:** Configured GitHub Actions workflow (`.github/workflows/tag_release.yml`) and `CODEOWNERS` for automated semantic git release tagging upon merging PRs to `main`.
+-   📖 **Comprehensive Zero-Setup Guide:** Added `Setup.md` covering prerequisites, dependency installation, `.env.example` configuration, local ChromaDB setup, and Docker OmniRoute setup for macOS, Linux, and Windows WSL2.
+-   🔇 **Silent & Clean CLI Experience:** Suppressed CrewAI telemetry and tracing banners (`CREWAI_TRACING_ENABLED=false`, `CREWAI_DISABLE_TELEMETRY=true`, `OTEL_SDK_DISABLED=true`) across CLI and automated test runs.
+-   🏷️ **Strict Citation Typing:** Guaranteed non-null string typing on `Citation.title` across candidate builder models.
+
+---
+
+# 📜 Previous Releases
+
+## **v3.2.0 -- Zero-Setup Documentation, Docker OmniRoute & Test Stabilization**
+
+### ✨ Highlights
+
+-   📖 **Setup Guide (`Setup.md`):** Complete walkthrough for fresh developer onboarding.
+-   🐳 **Docker OmniRoute Integration:** Full instructions for running self-hosted AI gateways across macOS, Linux, and Windows WSL2.
+-   📝 **Environment Template (`.env.example`):** Reference template for configuring Groq, Tavily, Hugging Face, and CrewAI environment keys.
+
+---
+
+## **v3.1.0 -- Embedding Calibration & Time-Aware Query Deduplication**
+
+### ✨ Highlights
+
+-   🧠 **BAAI/bge-small-en-v1.5 Embeddings:** Upgraded default embedding model to align with performance benchmarks.
+-   🗓️ **Query Generation Fix:** Fixed bug where the current year was appended to queries that already contained an explicit year.
+-   🧪 **Query Selector Assertions:** Added unit test coverage validating year-prefixed and time-aware query formats.
+
+---
 
 ## **v3.0.0 -- Autonomous Multi-Agent Crews & Long-Term Memory (LTM) Architecture**
 
@@ -105,7 +150,6 @@ The current implementation provides:
     *   `research_history`: Logs past topics and generated reports.
     *   `user_preferences`: Stores user depth (comprehensive vs. quick overview) and style guidelines (technical, concise, tutorial).
 -   🔌 **Model Context Protocol (MCP) Client:** Implemented stdio-based JSON-RPC transport client connecting to local MCP servers. Dynamically discovers tools and exposes them to the researcher crew.
--   🛡️ **Rate-Limit & Token Safeguards:** Constrained agent ReAct iterations (`max_iter=3`), query counts (max 3), and tool observation chunks (capped to `500` characters) to strictly fit inside Groq's 8,000 TPM limit.
 -   ⚖️ **Metadata Refinement:** Configured fallback overrides setting `Source.NONE`, `Confidence.NONE`, and empty citations when the generator issues an unknown refusal message (*"I don't have enough information..."*).
 
 ---
@@ -332,12 +376,20 @@ because they have different score semantics.
 ``` text
 intelligent-agentic-research-assistant/
 │
+├── .github/
+│   ├── workflows/
+│   │   └── tag_release.yml     # Automated semantic git tagging on merge
+│   └── CODEOWNERS              # Repository code ownership configuration
 ├── app.py                      # Interactive CLI application entry point
 ├── config/
 │   ├── settings.py             # Centralized application parameters
 │   └── mcp_servers.json        # MCP server connection configurations
 ├── data/                       # Local document collection directories
-├── db/                         # Chroma DB vector database files (ignored)
+├── db/                         # Chroma DB vector database & SQLite LTM files (ignored)
+├── demo/                       # Standalone reproducible demonstration scripts
+│   ├── demo_rag.py             # Interactive RAG evaluation test harness
+│   └── demo_crew_mcp_memory.py # CrewAI + MCP + SQLite LTM multi-agent demo
+├── outputs/                    # Output directory for generated markdown reports
 ├── scratch/                    # Temporary and diagnostic test scripts
 ├── models/                     # Type contracts and dataclasses
 │   ├── agent_state.py
@@ -408,8 +460,10 @@ intelligent-agentic-research-assistant/
 │   ├── test_tavily.py
 │   └── test_web_search_fallback.py
 ├── requirements.txt
+├── Setup.md                    # Comprehensive local setup & onboarding guide
 ├── README.md
 ├── LICENSE
+├── .env.example                # Template configuration file
 └── .env
 ```
 
@@ -417,12 +471,15 @@ intelligent-agentic-research-assistant/
 
 | Directory | Purpose |
 | :--- | :--- |
+| `.github/` | CI/CD automation workflows and CODEOWNERS rules |
 | `config/` | Centralized application configuration |
+| `demo/` | Live demonstration test harnesses (RAG, CrewAI, MCP, Memory) |
 | `models/` | Typed domain models, including agent and tool contracts |
-| `services/` | Business logic and application services |
+| `services/` | Business logic, agent services, RAG pipeline, and MCP client |
 | `services/knowledge/` | Source-specific knowledge retrieval abstractions |
 | `services/tools/` | Registered tool execution adapters |
-| `db/` | Persistent Chroma vector databases (one per collection) |
+| `outputs/` | Generated Markdown research reports |
+| `db/` | Persistent Chroma vector databases & SQLite LTM storage |
 | `data/` | Collection-based local knowledge base |
 | `tests/` | Deterministic unit tests and opt-in external integration tests |
 
@@ -873,8 +930,31 @@ follow-ups, and Tavily result structure/relevance. The v3.0.0 mock suites cover 
   ---------------------------------------------------------------------
   Version                       Description
   ----------------------------- ---------------------------------------
-  **v3.0.0**                    Autonomous Multi-Agent Crews, SQLite LTM preference
-                                engines, Model Context Protocol stdio dynamic tool
+  **v3.2.3**                    Multi-Agent CrewAI native tool calling stability fix,
+                                bounded iteration headroom (`MAX_AGENT_ITERATIONS = 15`),
+                                prompt completion directives, and telemetry banner suppression.
+
+  **v3.2.2**                    Standalone live demonstration test harness scripts
+                                (`demo/demo_rag.py`, `demo/demo_crew_mcp_memory.py`)
+                                for RAG, CrewAI, MCP, and SQLite LTM verification.
+
+  **v3.2.1**                    Type contracts refinement ensuring `Citation.title` is
+                                strictly typed as a non-null string in candidate models.
+
+  **v3.2.0**                    Production Zero-Setup onboarding guide (`Setup.md`),
+                                Docker OmniRoute integration, and Windows WSL2 virtualization.
+
+  **v3.1.4 - v3.1.5**           Environment setup templates (`.env.example`) and onboarding docs.
+
+  **v3.1.3**                    Automated semantic git tagging & release CI/CD workflow
+                                on merge to `main` via GitHub Actions (`.github/workflows/tag_release.yml`).
+
+  **v3.1.0 - v3.1.2**           Upgraded default embedding model to `BAAI/bge-small-en-v1.5`,
+                                resolved time-aware query year duplication bug, and added
+                                query selector unit assertion coverage.
+
+  **v3.0.0**                    Autonomous Multi-Agent Crews (CrewAI), SQLite LTM preference
+                                engines, Model Context Protocol (MCP) stdio dynamic tool
                                 integrations, and fallback refusal metadata overrides.
 
   **v2.9.6**                    OmniRoute AI Gateway integration, OpenAI-compatible
@@ -1058,6 +1138,37 @@ autonomous research assistant.
 -   🧪 Mock-based test coverage for all RAG and agent service components.
 
 ------------------------------------------------------------------------
+
+## ✅ v3.1.0
+
+### High-Precision Embeddings & Query Deduplication
+
+-   🧠 Default embedding model migrated to `BAAI/bge-small-en-v1.5`.
+-   🗓️ Time-aware query generator fixed to prevent redundant year duplication.
+-   🧪 Added comprehensive unit assertions for query generation patterns.
+-   🏷️ GitHub Actions workflow for automated semantic git release tagging.
+
+------------------------------------------------------------------------
+
+## ✅ v3.2.0
+
+### Zero-Setup Onboarding & Virtualization Support
+
+-   📖 Production-grade setup guide (`Setup.md`) and `.env.example`.
+-   🐳 Local Docker OmniRoute setup for macOS, Linux, and Windows WSL2.
+-   🏷️ Strict typing on `Citation.title` across candidate builder models.
+
+------------------------------------------------------------------------
+
+## ✅ v3.2.3
+
+### Multi-Agent Crew Stability & Live Demonstration Suite
+
+-   🛡️ Native function calling on CrewAI LLMs (`crew_llm.supports_function_calling = lambda: True`).
+-   ⚡ Tuned agent iteration headroom (`MAX_AGENT_ITERATIONS = 15`) and refined completion directives.
+-   🚀 Reproducible live demo scripts in `demo/` (`demo_rag.py`, `demo_crew_mcp_memory.py`).
+-   📂 Portable workspace filesystem path resolution with dynamic `./data` referencing.
+-   🔇 Auto-suppression of CrewAI telemetry and tracing banners in interactive CLI sessions.
 
 # 📚 Learning Journey
 
