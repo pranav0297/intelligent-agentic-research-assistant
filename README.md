@@ -1246,7 +1246,7 @@ development.
 
 **Pranav Mishra**
 
-AI Engineer passionate about building production-quality AI systems with
+Senior Software Engineer passionate about building production-quality AI systems with
 a strong emphasis on software architecture, Retrieval-Augmented
 Generation (RAG), Agentic AI, and scalable machine learning
 applications.
