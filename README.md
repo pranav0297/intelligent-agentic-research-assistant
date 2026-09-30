@@ -532,7 +532,7 @@ Assistant locally.
 ## 1. Clone the Repository
 
 ``` bash
-git clone https://github.com/hbhandari247-git/intelligent-agentic-research-assistant.git
+git clone https://github.com/pranav0297/intelligent-agentic-research-assistant.git
 
 cd intelligent-agentic-research-assistant
 ```
@@ -1244,7 +1244,7 @@ development.
 
 # 👨💻 Author
 
-**Himanshu Bhandari**
+**Pranav Mishra**
 
 AI Engineer passionate about building production-quality AI systems with
 a strong emphasis on software architecture, Retrieval-Augmented
@@ -1253,8 +1253,7 @@ applications.
 
 ### Connect
 
--   GitHub: https://github.com/hbhandari247-git
--   LinkedIn: https://www.linkedin.com/in/hbhandari247
+-   GitHub: https://github.com/pranav0297
 
 ------------------------------------------------------------------------
 
